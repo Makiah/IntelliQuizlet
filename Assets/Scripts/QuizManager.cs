@@ -36,6 +36,7 @@ public class QuizManager : MonoBehaviour {
 		actualAnswerKeywords = DeterminePhraseKeywords (actualAnswerField.text);
 		userAnswerField.interactable = true;
 		SetButtonState (ButtonState.IGIVEUP);
+		UpdatePercentageCompleteSlider ();
 	}
 		
 	private string[] actualAnswerKeywords;
@@ -68,7 +69,13 @@ public class QuizManager : MonoBehaviour {
 		{
 			OnQuestionComplete ();
 			if (indexOfDuplicatedQuestion == -1) //This would imply that the user did NOT click "I GIVE UP".  
-				SetButtonState(ButtonState.IWASWRONG);
+			{
+				SetButtonState (ButtonState.IWASWRONG);
+			} else
+			{
+
+				actualAnswerField.GetComponent <Animator> ().SetTrigger ("SlideDown");
+			}
 		}
 	}
 
@@ -106,7 +113,9 @@ public class QuizManager : MonoBehaviour {
 			keywords.Add (s);
 
 		//Remove all predetermined unnecessary words.  
-		string[] unnecessaryPhrases = {"the", "a", "an", "almost", "exactly", "etc", "etc.", "are", "is", "aspect", "as", "because", "basically", "completely", "for", "when"};
+		string[] unnecessaryPhrases = 
+		{"the", "a", "an", "almost", "exactly", "etc", "etc.", "are", "is", "aspect", "as", "because", "basically", 
+			"completely", "for", "when", "or", "that", "this"};
 
 		foreach (string un in unnecessaryPhrases)
 		{

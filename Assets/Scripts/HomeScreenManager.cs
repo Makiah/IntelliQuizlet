@@ -112,6 +112,7 @@ public class HomeScreenManager : MonoBehaviour
 
 	public void OnReadyPressed()
 	{
+		Debug.Log ("Got ready press!");
 		if (buttonState != ButtonState.DISABLED)
 		{
 			obtainedPath = path.text;
