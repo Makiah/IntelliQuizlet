@@ -14,6 +14,7 @@ public class QuizToggle : MonoBehaviour {
 
 	void Start()
 	{
+		QuizManager.instance.DetermineInitialPositions ();
 		textComponent = transform.GetChild(0).GetComponent <Text> ();
 		ToggleQuizMode ();
 	}
@@ -30,10 +31,10 @@ public class QuizToggle : MonoBehaviour {
 			GetComponent <Image> ().color = Color.red;
 		} else
 		{
+			QuizManager.instance.Deactivate ();
 			quizCanvas.gameObject.SetActive (false);
 			editCanvas.gameObject.SetActive (true);
 			textComponent.text = "Enter Quiz Mode";
-			QuizManager.instance.Deactivate ();
 			GetComponent <Image> ().color = Color.green;
 		}
 	}

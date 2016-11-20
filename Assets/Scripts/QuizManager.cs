@@ -9,6 +9,10 @@ public class QuizManager : MonoBehaviour {
 	void Awake() {instance = this;}
 
 	public InputField questionField, userAnswerField, actualAnswerField;
+	private Vector2 initialQuestionFieldPos, initialUserAnswerPos, initialActualAnswerPos;
+	private Vector2 initialQuestionFieldAnchorMin, initialQuestionFieldAnchorMax;
+	private Vector2 initialUserAnswerFieldAnchorMin, initialUserAnswerFieldAnchorMax; 
+	private Vector2 initialActualAnswerFieldAnchorMin, initialActualAnswerFieldAnchorMax; 
 	public Button iGiveUpButton;
 	public Slider percentageStudyingComplete, percentageQuestionComplete;
 
@@ -37,6 +41,23 @@ public class QuizManager : MonoBehaviour {
 		userAnswerField.interactable = true;
 		SetButtonState (ButtonState.IGIVEUP);
 		UpdatePercentageCompleteSlider ();
+	}
+
+	//Called by QuizToggle before deactivating this canvas.  
+	public void DetermineInitialPositions()
+	{
+		//Set initial positions for deactivate
+		initialQuestionFieldPos = questionField.GetComponent <RectTransform> ().anchoredPosition;
+		initialQuestionFieldAnchorMin = questionField.GetComponent <RectTransform> ().anchorMin;
+		initialQuestionFieldAnchorMax = questionField.GetComponent <RectTransform> ().anchorMax;
+
+		initialActualAnswerPos = actualAnswerField.GetComponent <RectTransform> ().anchoredPosition;
+		initialActualAnswerFieldAnchorMin = actualAnswerField.GetComponent <RectTransform> ().anchorMin;
+		initialUserAnswerFieldAnchorMax = actualAnswerField.GetComponent <RectTransform> ().anchorMax;
+
+		initialUserAnswerPos = userAnswerField.GetComponent <RectTransform> ().anchoredPosition;
+		initialUserAnswerFieldAnchorMin = userAnswerField.GetComponent <RectTransform> ().anchorMin;
+		initialUserAnswerFieldAnchorMax = userAnswerField.GetComponent <RectTransform> ().anchorMax;
 	}
 		
 	private string[] actualAnswerKeywords;
@@ -87,6 +108,16 @@ public class QuizManager : MonoBehaviour {
 		//Eliminate end or beginning spaces.  
 		phrase.Trim();
 
+		//Eliminate everything in parentheses.  (Do before punctuation removal), multiple sets per answer as well.  
+		int indexOfLeftParen = phrase.IndexOf("("), indexOfRightParen = phrase.IndexOf(")");
+		while (indexOfLeftParen != -1 || indexOfRightParen != -1) //When either one is gone, there are no more pairs.
+		{
+			indexOfLeftParen = phrase.IndexOf("(");
+			indexOfRightParen = phrase.IndexOf(")");
+
+			phrase = ((indexOfLeftParen > 0) ? phrase.Substring(0, indexOfLeftParen) : "") + ((indexOfRightParen < phrase.Length - 1) ? phrase.Substring(indexOfRightParen + 1) : "");
+		}   
+
 		//Get rid of any punctuation. 
 		System.Text.StringBuilder sb = new System.Text.StringBuilder();
 		foreach (char c in phrase)
@@ -99,12 +130,6 @@ public class QuizManager : MonoBehaviour {
 		//Eliminate any double spaces and replace with single spaces.  
 		while(phrase.Contains("  ")) phrase = phrase.Replace("  ", " ");
 
-		//Eliminate everything in parentheses.  
-		if (phrase.IndexOf ("(") != -1 && phrase.IndexOf (")") != -1)
-		{
-			phrase = phrase.Substring (0, phrase.IndexOf ("(")) + phrase.Substring(phrase.IndexOf (")") + 1);
-		}
-
 		//Separate string into individual words.  
 		List <string> keywords = new List <string> ();
 
@@ -115,7 +140,7 @@ public class QuizManager : MonoBehaviour {
 		//Remove all predetermined unnecessary words.  
 		string[] unnecessaryPhrases = 
 		{"the", "a", "an", "almost", "exactly", "etc", "etc.", "are", "is", "aspect", "as", "because", "basically", 
-			"completely", "for", "when", "or", "that", "this"};
+			"completely", "for", "when", "or", "that", "this", "and", "or"};
 
 		foreach (string un in unnecessaryPhrases)
 		{
@@ -259,6 +284,42 @@ public class QuizManager : MonoBehaviour {
 	public void Deactivate()
 	{
 		questionOrder = null;
+
+		//Reset user answer field.  
+		userAnswerField.interactable = true;
+		userAnswerField.textComponent.color = Color.green;
+		userAnswerField.text = "";
+		userAnswerField.textComponent.color = Color.black;
+
+		//Reset all positions (UGH)
+		questionField.GetComponent <RectTransform> ().anchoredPosition = initialQuestionFieldPos;
+		questionField.GetComponent <RectTransform> ().anchorMin = initialQuestionFieldAnchorMin;
+		questionField.GetComponent <RectTransform> ().anchorMax = initialQuestionFieldAnchorMax;
+
+		actualAnswerField.GetComponent <RectTransform> ().anchoredPosition = initialActualAnswerPos;
+		actualAnswerField.GetComponent <RectTransform> ().anchorMin = initialActualAnswerFieldAnchorMin;
+		actualAnswerField.GetComponent <RectTransform> ().anchorMax = initialUserAnswerFieldAnchorMax;
+
+		userAnswerField.GetComponent <RectTransform> ().anchoredPosition = initialUserAnswerPos;
+		userAnswerField.GetComponent <RectTransform> ().anchorMin = initialUserAnswerFieldAnchorMin;
+		userAnswerField.GetComponent <RectTransform> ().anchorMax = initialUserAnswerFieldAnchorMax;
+
+		//Update both sliders.  
+		//Calculate degree of similarity.  
+		float degreeOfSimilarity = 0;
+		percentageQuestionComplete.value = degreeOfSimilarity;
+		percentageQuestionComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, degreeOfSimilarity);
+
+		//Calculate percent complete
+		float percentComplete = 0;
+		percentageStudyingComplete.value = percentComplete;
+		//Update the color.  
+		percentageStudyingComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, percentComplete);
+		//Update the text
+		percentageStudyingComplete.transform.FindChild("Fill Area").GetChild(0).GetChild(0).GetComponent <Text> ().text = "" + ((int) ((percentComplete * 100))) + "%";
+
+		//Reset the button to its original state.  
+		SetButtonState (ButtonState.IGIVEUP);
 	}
 
 	//Button States

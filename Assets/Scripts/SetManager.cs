@@ -64,7 +64,6 @@ public class SetManager : MonoBehaviour {
 						{
 							string[] entries = line.Split ('~');
 							string question = entries[0], answer = entries[1];
-							Debug.Log("Creating QAPair " + question + ", " + answer);
 							if (!(question.Equals("") && answer.Equals("")))
 								QAPair.Create(question, answer);
 						}
