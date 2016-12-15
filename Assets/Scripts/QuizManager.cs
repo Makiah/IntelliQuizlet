@@ -2,6 +2,8 @@
 using System.Collections;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
+using System;
 
 public class QuizManager : MonoBehaviour {
 
@@ -29,7 +31,7 @@ public class QuizManager : MonoBehaviour {
 		//Remove until order established.  
 		while (originalList.Count > 0)
 		{
-			int chosenIndex = Random.Range (0, originalList.Count);
+			int chosenIndex = UnityEngine.Random.Range (0, originalList.Count);
 			questionOrder.Add (originalList [chosenIndex]);
 			originalList.RemoveAt (chosenIndex);
 		}
@@ -94,12 +96,13 @@ public class QuizManager : MonoBehaviour {
 				SetButtonState (ButtonState.IWASWRONG);
 			} else
 			{
-
 				actualAnswerField.GetComponent <Animator> ().SetTrigger ("SlideDown");
+				indexOfDuplicatedQuestion = -1;
 			}
 		}
 	}
 
+	//Determines an array of key words from a single string (relatively complex method)
 	public string[] DeterminePhraseKeywords(string phrase) 
 	{
 		//Make lowercase.  
@@ -107,23 +110,26 @@ public class QuizManager : MonoBehaviour {
 
 		//Eliminate end or beginning spaces.  
 		phrase.Trim();
+	
 
 		//Eliminate everything in parentheses.  (Do before punctuation removal), multiple sets per answer as well.  
 		int indexOfLeftParen = phrase.IndexOf("("), indexOfRightParen = phrase.IndexOf(")");
-		while (indexOfLeftParen != -1 || indexOfRightParen != -1) //When either one is gone, there are no more pairs.
+		while ((indexOfLeftParen != -1 && indexOfRightParen != -1) && (indexOfLeftParen < indexOfRightParen)) //When either one is gone, there are no more pairs.
 		{
 			indexOfLeftParen = phrase.IndexOf("(");
 			indexOfRightParen = phrase.IndexOf(")");
 
 			phrase = ((indexOfLeftParen > 0) ? phrase.Substring(0, indexOfLeftParen) : "") + ((indexOfRightParen < phrase.Length - 1) ? phrase.Substring(indexOfRightParen + 1) : "");
 		}   
-
+			
 		//Get rid of any punctuation. 
 		System.Text.StringBuilder sb = new System.Text.StringBuilder();
 		foreach (char c in phrase)
 		{
-			if (!char.IsPunctuation(c))
-				sb.Append(c);
+			if (!char.IsPunctuation (c))
+				sb.Append (c);
+			else if (c == '/' || c == '-')
+				sb.Append (' '); // for situations like /s or -s, which make weird words be required.  
 		}
 		phrase = sb.ToString();
 
@@ -140,7 +146,7 @@ public class QuizManager : MonoBehaviour {
 		//Remove all predetermined unnecessary words.  
 		string[] unnecessaryPhrases = 
 		{"the", "a", "an", "almost", "exactly", "etc", "etc.", "are", "is", "aspect", "as", "because", "basically", 
-			"completely", "for", "when", "or", "that", "this", "and", "or"};
+			"completely", "for", "when", "or", "that", "this", "and", "or", "of", "in", "by", "to", "too"};
 
 		foreach (string un in unnecessaryPhrases)
 		{
@@ -195,7 +201,7 @@ public class QuizManager : MonoBehaviour {
 			actualAnswerField.transform.GetComponent <Animator> ().SetTrigger ("SlideUp");
 			//Add this question to the list at a random point again.  
 			questionOrder [0].incorrectlyAnswered++;
-			indexOfDuplicatedQuestion = Random.Range (1, questionOrder.Count);
+			indexOfDuplicatedQuestion = UnityEngine.Random.Range (1, questionOrder.Count);
 			questionOrder.Insert (indexOfDuplicatedQuestion, questionOrder [0]);
 			//Update the slider.  
 			UpdatePercentageCompleteSlider ();
@@ -214,9 +220,30 @@ public class QuizManager : MonoBehaviour {
 			actualAnswerField.transform.GetComponent <Animator> ().SetTrigger ("SlideUp");
 			//Add this question to the list at a random point again.  
 			questionOrder [0].incorrectlyAnswered++;
-			questionOrder.Insert (Random.Range (1, questionOrder.Count), questionOrder [0]);
+			questionOrder.Insert (UnityEngine.Random.Range (1, questionOrder.Count), questionOrder [0]);
 			//Update the slider.  
 			break;
+		}
+	}
+
+	//Helpful to stop user from having to click on the button every so often
+	void Update()
+	{
+		if (Input.GetKeyDown (KeyCode.Return))
+		{
+			OnButtonPress ();
+
+			//Find the enter in the input field that was last pressed.  
+			int indexOfTab = userAnswerField.text.IndexOf("\n");
+			string newText = "";
+			if (indexOfTab > 0) //Check to make sure that is not -1, and greater than 0 in one go.  
+			{
+				newText = userAnswerField.text.Substring (0, indexOfTab);
+				if (indexOfTab < userAnswerField.text.Length - 1)
+					newText = newText + userAnswerField.text.Substring (indexOfTab + 1);
+			}
+
+			userAnswerField.text = newText;
 		}
 	}
 
@@ -274,6 +301,9 @@ public class QuizManager : MonoBehaviour {
 
 			//Reset the button to its original state.  
 			SetButtonState (ButtonState.IGIVEUP);
+
+			userAnswerField.OnPointerClick (new PointerEventData (EventSystem.current));  //if it's an input field, also set the text caret
+			EventSystem.current.SetSelectedGameObject (userAnswerField.gameObject, new BaseEventData (EventSystem.current));
 		} else
 		{
 			QuizToggle.instance.ToggleQuizMode ();
@@ -349,5 +379,5 @@ public class QuizManager : MonoBehaviour {
 			break;
 		}
 	}
-
+		
 }

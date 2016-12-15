@@ -48,7 +48,18 @@ public class TabbingBehaviour : MonoBehaviour {
 					{
 						system.SetSelectedGameObject (newInputField.gameObject, new BaseEventData (system)); 
 						newInputField.OnPointerClick (new PointerEventData (system));
-						currentInputField.text = currentInputField.text.Substring (0, currentInputField.text.Length - 1); //Cut off the tab component.  
+
+						//Find the tap in the input field that was last selected.  
+						int indexOfTab = currentInputField.text.IndexOf("\t");
+						string newText = "";
+						if (indexOfTab > 0) //Check to make sure that is not -1, and greater than 0 in one go.  
+						{
+							newText = currentInputField.text.Substring (0, indexOfTab);
+							if (indexOfTab < currentInputField.text.Length - 1)
+								newText = newText + currentInputField.text.Substring (indexOfTab + 1);
+						}
+
+						currentInputField.text = newText;
 					}
 					
 				}
