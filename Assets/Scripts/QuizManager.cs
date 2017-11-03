@@ -86,7 +86,7 @@ public class QuizManager : MonoBehaviour {
 		//Calculate degree of similarity.  
 		float degreeOfSimilarity = ((float) (similarities)) / ((float) (actualAnswerKeywords.Length));
 		percentageQuestionComplete.value = degreeOfSimilarity;
-		percentageQuestionComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, degreeOfSimilarity);
+		percentageQuestionComplete.transform.Find ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, degreeOfSimilarity);
 
 		if (degreeOfSimilarity >= 0.8)
 		{
@@ -267,9 +267,9 @@ public class QuizManager : MonoBehaviour {
 		float percentComplete = (float) (QAPair.setQuestions.Count - questionOrder.Count) / QAPair.setQuestions.Count;
 		percentageStudyingComplete.value = percentComplete;
 		//Update the color.  
-		percentageStudyingComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, percentComplete);
+		percentageStudyingComplete.transform.Find ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, percentComplete);
 		//Update the text
-		percentageStudyingComplete.transform.FindChild("Fill Area").GetChild(0).GetChild(0).GetComponent <Text> ().text = "" + ((int) ((percentComplete * 100))) + "%";
+		percentageStudyingComplete.transform.Find("Fill Area").GetChild(0).GetChild(0).GetComponent <Text> ().text = "" + ((int) ((percentComplete * 100))) + "%";
 	}
 
 
@@ -338,15 +338,15 @@ public class QuizManager : MonoBehaviour {
 		//Calculate degree of similarity.  
 		float degreeOfSimilarity = 0;
 		percentageQuestionComplete.value = degreeOfSimilarity;
-		percentageQuestionComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, degreeOfSimilarity);
+		percentageQuestionComplete.transform.Find ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, degreeOfSimilarity);
 
 		//Calculate percent complete
 		float percentComplete = 0;
 		percentageStudyingComplete.value = percentComplete;
 		//Update the color.  
-		percentageStudyingComplete.transform.FindChild ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, percentComplete);
+		percentageStudyingComplete.transform.Find ("Fill Area").GetChild (0).GetComponent <Image> ().color = Color.Lerp (Color.red, Color.green, percentComplete);
 		//Update the text
-		percentageStudyingComplete.transform.FindChild("Fill Area").GetChild(0).GetChild(0).GetComponent <Text> ().text = "" + ((int) ((percentComplete * 100))) + "%";
+		percentageStudyingComplete.transform.Find("Fill Area").GetChild(0).GetChild(0).GetComponent <Text> ().text = "" + ((int) ((percentComplete * 100))) + "%";
 
 		//Reset the button to its original state.  
 		SetButtonState (ButtonState.IGIVEUP);

@@ -39,9 +39,9 @@ public class TabbingBehaviour : MonoBehaviour {
 						int qaPairChildIndex = currentInputField.transform.parent.GetSiblingIndex ();
 						int totalNumberOfChildren = currentInputField.transform.parent.parent.childCount - 1;
 						if (qaPairChildIndex < totalNumberOfChildren - 1)
-							newInputField = currentInputField.gameObject.transform.parent.parent.GetChild (qaPairChildIndex + 1).FindChild ("Question").GetComponent <InputField> ();
+							newInputField = currentInputField.gameObject.transform.parent.parent.GetChild (qaPairChildIndex + 1).Find ("Question").GetComponent <InputField> ();
 						else
-							newInputField = QAPair.Create ("", "").transform.FindChild("Question").GetComponent <InputField> ();
+							newInputField = QAPair.Create ("", "").transform.Find("Question").GetComponent <InputField> ();
 					}
 
 					if (newInputField != null)
